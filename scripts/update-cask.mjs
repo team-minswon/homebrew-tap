@@ -4,6 +4,16 @@ import { resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const repository = "team-minswon/homebrew-tap";
+const minimumMacOSCheck = `version=$(/usr/bin/sw_vers -productVersion) || exit 1
+major=\${version%%.*}
+minor=\${version#*.}
+minor=\${minor%%.*}
+if [ "$major" -ge 14 ] && { [ "$major" -gt 14 ] || [ "$minor" -ge 2 ]; }; then
+  exit 0
+fi
+printf '%s\n' 'HeyMoa requires macOS 14.2 or later for system audio capture.' >&2
+exit 1`;
+
 export function assetsFor(release, version) {
   if (!/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(version)) throw new Error("Invalid version");
   if (release.draft || !release.published_at || release.tag_name !== `desktop-v${version}`) throw new Error("A published matching desktop release is required");
@@ -37,7 +47,7 @@ export async function verify(asset, body, expected) {
 }
 export function render(version, arm, intel) {
   if (!/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(version) || ![arm, intel].every((value) => /^[a-f0-9]{64}$/.test(value))) throw new Error("Invalid cask input");
-  return `cask "heymoa" do\n  arch arm: "arm64", intel: "x64"\n\n  version "${version}"\n  sha256 arm:   "${arm}",\n         intel: "${intel}"\n\n  url "https://github.com/${repository}/releases/download/desktop-v#{version}/HeyMoa-#{version}-mac-#{arch}.zip",\n      verified: "github.com/${repository}/"\n  name "HeyMoa"\n  desc "Meeting audio recording"\n  homepage "https://heymoa.app"\n\n  depends_on macos: :sonoma\n\n  app "HeyMoa.app"\n\n  preflight do\n    if MacOS.full_version < MacOSVersion.new("14.2")\n      raise "HeyMoa requires macOS 14.2 or later for system audio capture."\n    end\n  end\n\n  caveats <<~EOS\n    This is an unsigned beta without Developer ID signing or Apple notarization.\n    Homebrew installation does not bypass Gatekeeper. If macOS blocks the app,\n    use the app-specific Privacy & Security approval after verifying its source.\n    Approve microphone during first-run setup or when starting a recording.\n    System audio permission is checked when recording begins.\n    Finish recording before upgrading. Automatic updates are not configured.\n  EOS\nend\n`;
+  return `cask "heymoa" do\n  arch arm: "arm64", intel: "x64"\n\n  version "${version}"\n  sha256 arm:   "${arm}",\n         intel: "${intel}"\n\n  url "https://github.com/${repository}/releases/download/desktop-v#{version}/HeyMoa-#{version}-mac-#{arch}.zip"\n  name "HeyMoa"\n  desc "Meeting audio recording"\n  homepage "https://heymoa.app"\n\n  depends_on macos: :sonoma\n\n  app "HeyMoa.app"\n\n  preflight_steps do\n    run "/bin/sh", args: ["-c", ${JSON.stringify(minimumMacOSCheck)}]\n  end\n\n  caveats <<~EOS\n    This is an unsigned beta without Developer ID signing or Apple notarization.\n    Homebrew installation does not bypass Gatekeeper. If macOS blocks the app,\n    use the app-specific Privacy & Security approval after verifying its source.\n    Approve microphone during first-run setup or when starting a recording.\n    System audio permission is checked when recording begins.\n    Finish recording before upgrading. Automatic updates are not configured.\n  EOS\nend\n`;
 }
 async function get(url) {
   const response = await fetch(url, { signal: AbortSignal.timeout(120000) });
