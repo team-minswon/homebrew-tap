@@ -1,9 +1,9 @@
 cask "heymoa" do
   arch arm: "arm64", intel: "x64"
 
-  version "0.1.0"
-  sha256 arm:   "e440fd897ad846faab1afaa8e41b3fcfea544325f6d0974d3e43a5f7cfa5e7bb",
-         intel: "beabfc38c476956209bb411a9a8e1351751df322b188e063b2e6a35c9f4aa177"
+  version "0.1.1"
+  sha256 arm:   "f7d22ec5986238518b323e3554bbb83da25fa5d3de0ba0b8afee8a3e6f9abf4e",
+         intel: "610a18836aa448cd59134fdeafbdcce107a93c3e7da873c0086940fc4e7da0d1"
 
   url "https://github.com/team-minswon/homebrew-tap/releases/download/desktop-v#{version}/HeyMoa-#{version}-mac-#{arch}.zip"
   name "HeyMoa"
