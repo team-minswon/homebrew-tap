@@ -8,7 +8,7 @@ cask "heymoa" do
   url "https://github.com/team-minswon/homebrew-tap/releases/download/desktop-v#{version}/HeyMoa-#{version}-mac-#{arch}.zip"
   name "HeyMoa"
   desc "Meeting audio recording"
-  homepage "https://heymoa.app"
+  homepage "https://heymoa.app/"
 
   depends_on macos: :sonoma
 
