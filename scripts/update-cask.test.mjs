@@ -41,7 +41,8 @@ test("one cask token preserves architecture checksums and exact minor-version gu
     assert.equal(result.status, 0, osVersion);
   }
   assert.equal(spawnSync("/bin/sh", ["-c", check.replace("/usr/bin/sw_vers -productVersion", "false")]).status, 1);
-  assert.match(cask, /without Developer ID/);
+  assert.match(cask, /signed with a Developer ID certificate and notarized by Apple/);
+  assert.doesNotMatch(cask, /unsigned/);
   assert.doesNotMatch(cask, /no_check|xattr|spctl|--no-quarantine/);
   assert.throws(() => render(version, "unknown", "b".repeat(64)), /Invalid/);
 });

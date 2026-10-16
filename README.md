@@ -7,6 +7,6 @@ brew install --cask team-minswon/tap/heymoa
 brew upgrade --cask heymoa
 ```
 
-업데이트 전에 녹음을 중지해 주세요. 현재 베타는 서명·공증이 적용되지 않아 macOS의 앱 실행 승인이 필요할 수 있습니다.
+업데이트 전에 녹음을 중지해 주세요. Mac 앱은 Apple 서명·공증을 받았습니다.
 
 [일반 다운로드 · Windows](https://github.com/team-minswon/homebrew-tap/releases) · [HeyMoa](https://heymoa.app)

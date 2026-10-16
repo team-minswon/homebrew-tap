@@ -1,9 +1,9 @@
 cask "heymoa" do
   arch arm: "arm64", intel: "x64"
 
-  version "0.1.0-beta.1"
-  sha256 arm:   "c6914fc97e1910a19e278c5255cefbf7a21d0fccb4bcdf3380a03c415174bd27",
-         intel: "5def0591d9f44dc26841b3dad125f1b7bfd64dcbf91bbfe80a0440e27848cf7d"
+  version "0.1.0"
+  sha256 arm:   "e440fd897ad846faab1afaa8e41b3fcfea544325f6d0974d3e43a5f7cfa5e7bb",
+         intel: "beabfc38c476956209bb411a9a8e1351751df322b188e063b2e6a35c9f4aa177"
 
   url "https://github.com/team-minswon/homebrew-tap/releases/download/desktop-v#{version}/HeyMoa-#{version}-mac-#{arch}.zip"
   name "HeyMoa"
@@ -19,9 +19,7 @@ cask "heymoa" do
   end
 
   caveats <<~EOS
-    This is an unsigned beta without Developer ID signing or Apple notarization.
-    Homebrew installation does not bypass Gatekeeper. If macOS blocks the app,
-    use the app-specific Privacy & Security approval after verifying its source.
+    HeyMoa is signed with a Developer ID certificate and notarized by Apple.
     Approve microphone during first-run setup or when starting a recording.
     System audio permission is checked when recording begins.
     Finish recording before upgrading. Automatic updates are not configured.
