@@ -1,6 +1,6 @@
 # HeyMoa Homebrew tap
 
-HeyMoa 데스크톱 앱의 공식 Homebrew tap입니다. macOS 14.2 이상, Apple Silicon을 지원합니다. Intel Mac 신규 설치는 지원하지 않습니다.
+HeyMoa 데스크톱 앱의 공식 Homebrew tap입니다. macOS 14.2 이상, Apple Silicon을 지원합니다.
 
 ```sh
 brew install --cask team-minswon/tap/heymoa
