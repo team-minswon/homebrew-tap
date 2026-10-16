@@ -18,7 +18,7 @@ export function assetsFor(release, version) {
   if (!/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(version)) throw new Error("Invalid version");
   if (release.draft || !release.published_at || release.tag_name !== `desktop-v${version}`) throw new Error("A published matching desktop release is required");
   const prefix = `https://github.com/${repository}/releases/download/desktop-v${version}/`;
-  return [`HeyMoa-${version}-mac-arm64.zip`, `HeyMoa-${version}-mac-x64.zip`, "SHA256SUMS"].map((name) => {
+  return [`HeyMoa-${version}-mac-arm64.zip`, "SHA256SUMS"].map((name) => {
     const matching = release.assets.filter((asset) => asset.name === name);
     if (matching.length !== 1 || matching[0].size <= 0 || matching[0].browser_download_url !== prefix + name) throw new Error(`Missing or invalid asset: ${name}`);
     return matching[0];
@@ -45,9 +45,34 @@ export async function verify(asset, body, expected) {
   if (size !== asset.size || digest !== expected) throw new Error(`Download size/checksum mismatch: ${asset.name}`);
   return digest;
 }
-export function render(version, arm, intel) {
-  if (!/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(version) || ![arm, intel].every((value) => /^[a-f0-9]{64}$/.test(value))) throw new Error("Invalid cask input");
-  return `cask "heymoa" do\n  arch arm: "arm64", intel: "x64"\n\n  version "${version}"\n  sha256 arm:   "${arm}",\n         intel: "${intel}"\n\n  url "https://github.com/${repository}/releases/download/desktop-v#{version}/HeyMoa-#{version}-mac-#{arch}.zip"\n  name "HeyMoa"\n  desc "Meeting audio recording"\n  homepage "https://heymoa.app/"\n\n  depends_on macos: :sonoma\n\n  app "HeyMoa.app"\n\n  preflight_steps do\n    run "/bin/sh", args: ["-c", ${JSON.stringify(minimumMacOSCheck)}]\n  end\n\n  caveats <<~EOS\n    HeyMoa is signed with a Developer ID certificate and notarized by Apple.\n    Approve microphone during first-run setup or when starting a recording.\n    System audio permission is checked when recording begins.\n    Finish recording before upgrading. Automatic updates are not configured.\n  EOS\nend\n`;
+export function render(version, arm) {
+  if (!/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(version) || !/^[a-f0-9]{64}$/.test(arm)) throw new Error("Invalid cask input");
+  return `cask "heymoa" do
+  version "${version}"
+  sha256 "${arm}"
+
+  url "https://github.com/${repository}/releases/download/desktop-v#{version}/HeyMoa-#{version}-mac-arm64.zip"
+  name "HeyMoa"
+  desc "Meeting audio recording"
+  homepage "https://heymoa.app/"
+
+  depends_on arch: :arm64
+  depends_on macos: :sonoma
+
+  app "HeyMoa.app"
+
+  preflight_steps do
+    run "/bin/sh", args: ["-c", ${JSON.stringify(minimumMacOSCheck)}]
+  end
+
+  caveats <<~EOS
+    HeyMoa is signed with a Developer ID certificate and notarized by Apple.
+    Approve microphone during first-run setup or when starting a recording.
+    System audio permission is checked when recording begins.
+    Finish recording before upgrading. Automatic updates are not configured.
+  EOS
+end
+`;
 }
 async function get(url) {
   const response = await fetch(url, { signal: AbortSignal.timeout(120000) });
@@ -58,13 +83,12 @@ async function update() {
   const version = process.argv[2];
   if (!version || process.argv.length !== 3 || !/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(version)) throw new Error("Usage: node scripts/update-cask.mjs VERSION");
   const release = await (await get(`https://api.github.com/repos/${repository}/releases/tags/desktop-v${version}`)).json();
-  const [arm, intel, sums] = assetsFor(release, version);
+  const [arm, sums] = assetsFor(release, version);
   const checksums = checksumsFor(await (await get(sums.browser_download_url)).text());
   const armHash = await verify(arm, (await get(arm.browser_download_url)).body, checksums.get(arm.name));
-  const intelHash = await verify(intel, (await get(intel.browser_download_url)).body, checksums.get(intel.name));
   const casks = fileURLToPath(new URL("../Casks/", import.meta.url));
   mkdirSync(casks, { recursive: true });
-  writeFileSync(resolve(casks, "heymoa.rb.tmp"), render(version, armHash, intelHash));
+  writeFileSync(resolve(casks, "heymoa.rb.tmp"), render(version, armHash));
   renameSync(resolve(casks, "heymoa.rb.tmp"), resolve(casks, "heymoa.rb"));
   console.log(`Verified published ${release.tag_name}; Casks/heymoa.rb updated locally, nothing pushed`);
 }

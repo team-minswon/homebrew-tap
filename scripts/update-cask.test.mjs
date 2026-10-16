@@ -4,9 +4,9 @@ import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { assetsFor, checksumsFor, verify, render } from "./update-cask.mjs";
 const version = "0.1.0-beta.1";
-const release = { draft: false, published_at: "fixture", tag_name: `desktop-v${version}`, assets: [`HeyMoa-${version}-mac-arm64.zip`, `HeyMoa-${version}-mac-x64.zip`, "SHA256SUMS"].map((name) => ({ name, size: 10, browser_download_url: `https://github.com/team-minswon/homebrew-tap/releases/download/desktop-v${version}/${name}` })) };
-test("only published matching releases with both real architecture URLs are eligible", () => {
-  assert.equal(assetsFor(release, version).length, 3);
+const release = { draft: false, published_at: "fixture", tag_name: `desktop-v${version}`, assets: [`HeyMoa-${version}-mac-arm64.zip`, "SHA256SUMS"].map((name) => ({ name, size: 10, browser_download_url: `https://github.com/team-minswon/homebrew-tap/releases/download/desktop-v${version}/${name}` })) };
+test("only published matching releases with the real Apple Silicon URL are eligible", () => {
+  assert.equal(assetsFor(release, version).length, 2);
   assert.throws(() => assetsFor({ ...release, draft: true }, version), /published/);
   assert.throws(() => assetsFor({ ...release, assets: release.assets.slice(1) }, version), /Missing/);
   assert.throws(() => assetsFor({ ...release, assets: release.assets.map((asset) => ({ ...asset, browser_download_url: "fixture-other-repository" })) }, version), /invalid/);
@@ -23,10 +23,12 @@ test("streaming bytes require the published size and exact checksum", async () =
   await assert.rejects(verify(asset, chunks(Buffer.concat([data, data])), digest), /exceeds/);
   assert.throws(() => checksumsFor("invalid"), /Malformed/);
 });
-test("one cask token preserves architecture checksums and exact minor-version guard without OS bypass", () => {
-  const cask = render(version, "a".repeat(64), "b".repeat(64));
+test("one cask token requires Apple Silicon and preserves checksums and exact minor-version guard without OS bypass", () => {
+  const cask = render(version, "a".repeat(64));
   assert.match(cask, /cask "heymoa"/);
   assert.match(cask, /depends_on macos: :sonoma/);
+  assert.match(cask, /depends_on arch: :arm64/);
+  assert.doesNotMatch(cask, /intel:|mac-x64|#\{arch\}/);
   assert.match(cask, /preflight_steps do/);
   assert.doesNotMatch(cask, /verified:|\bpreflight do|MacOSVersion/);
   const [, check] = JSON.parse(cask.match(/args: (\[.*\])/)[1]);
@@ -44,5 +46,5 @@ test("one cask token preserves architecture checksums and exact minor-version gu
   assert.match(cask, /signed with a Developer ID certificate and notarized by Apple/);
   assert.doesNotMatch(cask, /unsigned/);
   assert.doesNotMatch(cask, /no_check|xattr|spctl|--no-quarantine/);
-  assert.throws(() => render(version, "unknown", "b".repeat(64)), /Invalid/);
+  assert.throws(() => render(version, "unknown"), /Invalid/);
 });
