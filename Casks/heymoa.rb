@@ -1,6 +1,6 @@
 cask "heymoa" do
-  version "0.1.2"
-  sha256 "dcb2a9aa43962979b5fcaf1557a7f98c10370c6a2829e965a8dadcd9201b594c"
+  version "0.1.3"
+  sha256 "ac5561d5da507fcbf02a197a53eff640220881c5abd29c8954745db5ad601c57"
 
   url "https://github.com/team-minswon/homebrew-tap/releases/download/desktop-v#{version}/HeyMoa-#{version}-mac-arm64.zip"
   name "HeyMoa"
