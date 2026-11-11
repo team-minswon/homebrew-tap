@@ -69,8 +69,9 @@ export function render(version, arm) {
     HeyMoa is signed with a Developer ID certificate and notarized by Apple.
     Approve microphone during first-run setup or when starting a recording.
     System audio permission is checked when recording begins.
-    Finish recording before upgrading. In-app updates are available in Settings > App updates.
-    Automatic updates are off by default and can be enabled there.
+    Finish recording and audio uploads before upgrading.
+    Open Settings from the menu bar popup for opacity and app updates.
+    Automatic updates default to on for new or unset installations; explicit opt-out is preserved.
   EOS
 end
 `;

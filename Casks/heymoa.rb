@@ -1,6 +1,6 @@
 cask "heymoa" do
-  version "0.1.4"
-  sha256 "b2b93a0ea739bd06d80af1d61cf55cb5ce18aab1a7f47f4603e608d80c5d1592"
+  version "0.1.5"
+  sha256 "2d5aade59c175975fda78b505a203ad36ca85369a5d49d9b4a252e00fac15440"
 
   url "https://github.com/team-minswon/homebrew-tap/releases/download/desktop-v#{version}/HeyMoa-#{version}-mac-arm64.zip"
   name "HeyMoa"
@@ -20,7 +20,8 @@ cask "heymoa" do
     HeyMoa is signed with a Developer ID certificate and notarized by Apple.
     Approve microphone during first-run setup or when starting a recording.
     System audio permission is checked when recording begins.
-    Finish recording before upgrading. In-app updates are available in Settings > App updates.
-    Automatic updates are off by default and can be enabled there.
+    Finish recording and audio uploads before upgrading.
+    Open Settings from the menu bar popup for opacity and app updates.
+    Automatic updates default to on for new or unset installations; explicit opt-out is preserved.
   EOS
 end
